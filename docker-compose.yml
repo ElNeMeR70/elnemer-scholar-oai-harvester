@@ -1,0 +1,18 @@
+services:
+  elnemer-scholar-oai-harvester:
+    image: php:8.2-cli-alpine
+    container_name: elnemer-scholar-oai-harvester
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8084}:8080"
+    environment:
+      - ELNEMER_UPSTREAM_API=${ELNEMER_UPSTREAM_API:-https://million.elnemer-ai.com}
+    command: >
+      sh -c "mkdir -p /srv/app &&
+      wget -q -O /srv/app/index.php https://raw.githubusercontent.com/ElNeMeR70/elnemer-scholar-oai-harvester/main/app/index.php &&
+      php -S 0.0.0.0:8080 -t /srv/app"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/?health=1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
